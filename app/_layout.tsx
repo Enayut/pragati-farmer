@@ -1,39 +1,93 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { ThemeProvider } from "../context/ThemeContext"
+import { Stack } from "expo-router"
+import { StatusBar } from "expo-status-bar"
+import { SafeAreaProvider } from "react-native-safe-area-context"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
+import { useFonts } from 'expo-font'
+import { View, ActivityIndicator } from 'react-native'
+import { useUserStore } from "../store/userStore";
+import { useEffect } from "react";
+import { useRouter, useSegments } from "expo-router";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+function RootLayoutNav() {
+  const { isLoggedIn, user } = useUserStore();
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    const inAuthGroup = segments[0] === "auth";
+    const inFarmerTabsGroup = segments[0] === "(tabs)";
+    const inBuyerTabsGroup = segments[0] === "(buyer-tabs)";
+    
+    if (!isLoggedIn && !inAuthGroup) {
+      // Redirect to the sign-in page if not logged in
+      router.replace("/auth/login");
+    } else if (isLoggedIn) {
+      if (inAuthGroup) {
+        // Redirect away from auth pages when logged in
+        if (user?.role === "buyer") {
+          router.replace("/(buyer-tabs)");
+        } else {
+          router.replace("/(tabs)");
+        }
+      } else if (user?.role === "buyer" && !inBuyerTabsGroup) {
+        // Buyer trying to access farmer tabs
+        router.replace("/(buyer-tabs)");
+      } else if (user?.role !== "buyer" && !inFarmerTabsGroup && segments[0] !== undefined) {
+        // Farmer trying to access buyer tabs
+        router.replace("/(tabs)");
+      }
     }
-  }, [loaded]);
+  }, [isLoggedIn, segments, user?.role]);
 
-  if (!loaded) {
-    return null;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="field/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="field/new" options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="auth/login" 
+        options={{ 
+          headerShown: false,
+          // Prevent going back to the home screen
+          headerBackVisible: false,
+        }} 
+      />
+      <Stack.Screen 
+        name="auth/signup" 
+        options={{ 
+          headerShown: false,
+          // Prevent going back to the home screen
+          headerBackVisible: false,
+        }} 
+      />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(buyer-tabs)" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    'Inter-Black': require('../assets/fonts/Inter-Black.ttf'),
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider>
+          <RootLayoutNav />
+          <StatusBar />
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

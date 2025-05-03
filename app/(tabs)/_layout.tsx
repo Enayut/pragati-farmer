@@ -1,45 +1,81 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { Tabs } from "expo-router"
+import { useTheme } from "../../context/ThemeContext"
+import { Home, Feather, Calendar, ShoppingBag, BarChart2 } from "react-native-feather"
+import { Platform } from "react-native"
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function TabsLayout() {
+  const { colors, radius } = useTheme()
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+          height: Platform.OS === 'ios' ? 85 : 64,
+          borderTopWidth: 1,
+          elevation: 8,
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
           },
-          default: {},
-        }),
-      }}>
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "500",
+          marginTop: 2,
+          marginBottom: Platform.OS === 'ios' ? 4 : 2,
+          fontFamily: 'Inter-Medium',
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Dashboard",
+          tabBarIcon: ({ color, size }) => <Home stroke={color} width={size-4} height={size-4} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="fields"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Fields",
+          tabBarIcon: ({ color, size }) => <Feather stroke={color} width={size-4} height={size-4} />,
+        }}
+      />
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: "Marketplace",
+          tabBarIcon: ({ color, size }) => <ShoppingBag stroke={color} width={size-4} height={size-4} />,
+        }}
+      />
+      <Tabs.Screen
+        name="forecast"
+        options={{
+          title: "Forecast",
+          tabBarIcon: ({ color, size }) => <BarChart2 stroke={color} width={size-4} height={size-4} />,
+        }}
+      />
+      <Tabs.Screen
+        name="planning"
+        options={{
+          title: "Planning",
+          tabBarIcon: ({ color, size }) => <Calendar stroke={color} width={size-4} height={size-4} />,
         }}
       />
     </Tabs>
-  );
+  )
 }
