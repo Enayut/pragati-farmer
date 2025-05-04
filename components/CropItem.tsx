@@ -5,6 +5,7 @@ import type { Crop } from "../store/farmStore"
 import { Calendar, DollarSign, AlertTriangle } from "react-native-feather"
 import { Card } from "./Card"
 import { Typography } from "./Typography"
+import { TranslatedText } from "./TranslatedText"
 
 interface CropItemProps {
   crop: Crop
@@ -32,7 +33,9 @@ const CropItem: React.FC<CropItemProps> = ({ crop }) => {
         <View style={styles.header}>
           <View style={styles.nameContainer}>
             <Text style={styles.icon}>{crop.icon}</Text>
-            <Typography variant="subheading">{crop.name}</Typography>
+            <Typography variant="subheading">
+              <Text>{crop.name}</Text>
+            </Typography>
           </View>
           <View style={[styles.scoreContainer, { backgroundColor: colors.primary }]}>
             <Typography style={styles.score}>{crop.score}</Typography>

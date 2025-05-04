@@ -6,6 +6,7 @@ import { Feather } from "react-native-feather"
 import CircularProgress from "../components/CircularProgress"
 import { useFarmStore } from "../store/farmStore"
 import { useUserStore } from "../store/userStore"
+import {TranslatedText} from "../components/TranslatedText"
 
 const { width, height } = Dimensions.get("window")
 

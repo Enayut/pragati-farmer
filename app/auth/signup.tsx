@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { 
   View, 
   Text, 
@@ -7,12 +7,56 @@ import {
   TouchableOpacity, 
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  Modal,
+  FlatList
 } from "react-native";
+import { TranslatedText } from "../../components/TranslatedText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../context/ThemeContext";
 import { useUserStore } from "../../store/userStore";
 import { useRouter, Link } from "expo-router";
+import { ChevronDown, Search, X } from "react-native-feather";
+
+// List of Indian states
+const INDIAN_STATES = [
+  "ANDHRA PRADESH",
+  "TELANGANA",
+  "ASSAM",
+  "DELHI",
+  "GUJARAT",
+  "THE DADRA AND NAGAR HAVELI AND DAMAN AND DIU",
+  "CHHATTISGARH",
+  "BIHAR",
+  "HARYANA",
+  "MEGHALAYA",
+  "KARNATAKA",
+  "KERALA",
+  "JAMMU AND KASHMIR",
+  "LADAKH",
+  "JHARKHAND",
+  "MADHYA PRADESH",
+  "GOA",
+  "MAHARASHTRA",
+  "HIMACHAL PRADESH",
+  "ODISHA",
+  "PUNJAB",
+  "CHANDIGARH",
+  "MANIPUR",
+  "MIZORAM",
+  "NAGALAND",
+  "RAJASTHAN",
+  "TAMIL NADU",
+  "ARUNACHAL PRADESH",
+  "TRIPURA",
+  "PUDUCHERRY",
+  "UTTAR PRADESH",
+  "UTTARAKHAND",
+  "WEST BENGAL",
+  "ANDAMAN AND NICOBAR ISLANDS",
+  "SIKKIM",
+  "LAKSHADWEEP"
+];
 
 export default function SignupScreen() {
   const { colors } = useTheme();
@@ -24,24 +68,34 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [address, setAddress] = useState("");
-  const [zipCode, setZipCode] = useState(""); // Add zipCode state
-  const [role, setRole] = useState("farmer"); // Add role state with default "farmer"
+  const [zipCode, setZipCode] = useState(""); 
+  const [role, setRole] = useState("farmer");
+  
+  // State selection
+  const [state, setState] = useState("");
+  const [stateModalVisible, setStateModalVisible] = useState(false);
+  const [stateSearchQuery, setStateSearchQuery] = useState("");
+  const stateSearchRef = useRef<TextInput>(null);
 
   const validateEmail = (email: string) => {
     return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
   };
 
-  // Validate zipcode - basic validation for Indian PIN codes
   const validateZipCode = (zipCode: string) => {
-    return /^\d{6}$/.test(zipCode); // Indian PIN codes are 6 digits
+    return /^\d{6}$/.test(zipCode);
   };
+
+  // Filter states based on search query
+  const filteredStates = INDIAN_STATES.filter(
+    s => s.toLowerCase().includes(stateSearchQuery.toLowerCase())
+  );
 
   const handleSignup = async () => {
     // Clear any previous errors
     clearError();
     
     // Basic validation
-    if (!name || !email || !password || !confirmPassword || !address || !zipCode) {
+    if (!name || !email || !password || !confirmPassword || !address || !zipCode || !state) {
       Alert.alert("Validation Error", "All fields are required");
       return;
     }
@@ -70,9 +124,9 @@ export default function SignupScreen() {
       await registerUser({
         name,
         email,
-        role, // Use selected role instead of hardcoding "farmer"
-        address,
-        zipcode : zipCode // Add zipCode to registration data
+        role,
+        address: `${address}, ${state}`, // Include state in address
+        zipcode: zipCode
       });
 
       // If no error was thrown, redirect to appropriate home based on role
@@ -155,7 +209,7 @@ export default function SignupScreen() {
             <Text style={[styles.label, { color: colors.text }]}>Address</Text>
             <TextInput
               style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-              placeholder="Enter your farm address"
+              placeholder="Enter your address"
               placeholderTextColor={colors.textSecondary}
               value={address}
               onChangeText={setAddress}
@@ -163,7 +217,47 @@ export default function SignupScreen() {
             />
           </View>
           
-          {/* Add ZIP Code field */}
+          {/* State Selection Dropdown */}
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: colors.text }]}>State</Text>
+            <TouchableOpacity 
+              style={[
+                styles.input, 
+                styles.dropdownButton, 
+                { 
+                  backgroundColor: colors.card, 
+                  borderColor: colors.border,
+                  flex: 1
+                }
+              ]}
+              onPress={() => {
+                setStateModalVisible(true);
+                setStateSearchQuery("");
+                // Focus on search input when modal opens
+                setTimeout(() => {
+                  stateSearchRef.current?.focus();
+                }, 100);
+              }}
+            >
+              <Text 
+                style={{ 
+                  color: state ? colors.text : colors.textSecondary 
+                }}
+              >
+                {state || "Select your state"}
+              </Text>
+              <Text 
+                style={{ 
+                  color: state ? colors.text : colors.textSecondary,
+                  flex: 1
+                }}
+              >
+                {state || "Select your state"}
+              </Text>
+              <ChevronDown width={20} height={20} stroke={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: colors.text }]}>PIN Code</Text>
             <TextInput
@@ -177,7 +271,6 @@ export default function SignupScreen() {
             />
           </View>
 
-          {/* Add role selector after address field */}
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: colors.text }]}>I am a</Text>
             <View style={styles.roleSelector}>
@@ -233,7 +326,7 @@ export default function SignupScreen() {
 
           <View style={styles.loginTextContainer}>
             <Text style={[styles.loginText, { color: colors.textSecondary }]}>
-              Already have an account?{" "}
+              {"Already have an account? "}
             </Text>
             <Link href="/auth/login" asChild>
               <TouchableOpacity>
@@ -243,6 +336,77 @@ export default function SignupScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* State Selection Modal */}
+      <Modal
+        visible={stateModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setStateModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Select State</Text>
+              <TouchableOpacity 
+                style={styles.closeButton}
+                onPress={() => setStateModalVisible(false)}
+              >
+                <X width={24} height={24} stroke={colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={[styles.searchContainer, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+              <Search width={20} height={20} stroke={colors.textSecondary} style={{ marginRight: 8 }} />
+              <TextInput
+                ref={stateSearchRef}
+                style={[styles.searchInput, { color: colors.text }]}
+                placeholder="Search states..."
+                placeholderTextColor={colors.textSecondary}
+                value={stateSearchQuery}
+                onChangeText={setStateSearchQuery}
+                autoCapitalize="none"
+              />
+              {stateSearchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setStateSearchQuery("")}>
+                  <X width={18} height={18} stroke={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            <FlatList
+              data={filteredStates}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={[
+                    styles.stateOption,
+                    state === item && { backgroundColor: colors.primary + '15' }
+                  ]}
+                  onPress={() => {
+                    setState(item);
+                    setStateModalVisible(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.stateText, 
+                    { color: state === item ? colors.primary : colors.text }
+                  ]}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              contentContainerStyle={styles.stateList}
+              showsVerticalScrollIndicator={true}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Text style={{ color: colors.textSecondary }}>No states found</Text>
+                </View>
+              }
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -282,6 +446,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
+  },
+  dropdownButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   button: {
     height: 56,
@@ -326,4 +495,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '80%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginHorizontal: 20,
+    marginBottom: 10,
+    height: 44,
+  },
+  searchInput: {
+    flex: 1,
+    height: 44,
+    fontSize: 16,
+  },
+  stateList: {
+    paddingHorizontal: 20,
+  },
+  stateOption: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  stateText: {
+    fontSize: 16,
+  },
+  emptyState: {
+    padding: 20,
+    alignItems: 'center',
+  }
 });

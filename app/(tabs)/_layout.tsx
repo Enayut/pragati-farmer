@@ -1,10 +1,12 @@
 import { Tabs } from "expo-router"
 import { useTheme } from "../../context/ThemeContext"
-import { Home, Feather, Calendar, ShoppingBag, BarChart2 } from "react-native-feather"
+import { Home, Calendar, ShoppingBag, BarChart2, Award, CloudRain } from "react-native-feather"
 import { Platform } from "react-native"
+import { useTranslationStore } from "../../store/translationStore"
 
 export default function TabsLayout() {
   const { colors, radius } = useTheme()
+  const { translate } = useTranslationStore()
 
   return (
     <Tabs
@@ -44,36 +46,29 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Dashboard",
+          title: translate("Dashboard"),
           tabBarIcon: ({ color, size }) => <Home stroke={color} width={size-4} height={size-4} />,
-        }}
-      />
-      <Tabs.Screen
-        name="fields"
-        options={{
-          title: "Fields",
-          tabBarIcon: ({ color, size }) => <Feather stroke={color} width={size-4} height={size-4} />,
-        }}
-      />
-      <Tabs.Screen
-        name="marketplace"
-        options={{
-          title: "Marketplace",
-          tabBarIcon: ({ color, size }) => <ShoppingBag stroke={color} width={size-4} height={size-4} />,
         }}
       />
       <Tabs.Screen
         name="forecast"
         options={{
-          title: "Forecast",
-          tabBarIcon: ({ color, size }) => <BarChart2 stroke={color} width={size-4} height={size-4} />,
+          title: translate("Forecast"),
+          tabBarIcon: ({ color, size }) => <CloudRain stroke={color} width={size-4} height={size-4} />,
         }}
       />
       <Tabs.Screen
-        name="planning"
+        name="marketplace"
         options={{
-          title: "Planning",
-          tabBarIcon: ({ color, size }) => <Calendar stroke={color} width={size-4} height={size-4} />,
+          title: translate("Marketplace"),
+          tabBarIcon: ({ color, size }) => <ShoppingBag stroke={color} width={size-4} height={size-4} />,
+        }}
+      />
+      <Tabs.Screen
+        name="scheme"
+        options={{
+          title: translate("Schemes"),
+          tabBarIcon: ({ color, size }) => <Award stroke={color} width={size-4} height={size-4} />,
         }}
       />
     </Tabs>

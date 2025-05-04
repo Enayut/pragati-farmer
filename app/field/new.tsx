@@ -6,6 +6,7 @@ import { useUserStore } from "../../store/userStore"
 import { useRouter } from "expo-router"
 import { ArrowLeft, Camera, Calendar } from "react-native-feather"
 import { useState } from "react"
+import { TranslatedText } from "../../components/TranslatedText"
 
 export default function NewFieldScreen() {
   const { colors } = useTheme()

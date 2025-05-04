@@ -1,371 +1,472 @@
-import React, { useState, useEffect } from 'react'
-import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native'
-import { useTheme } from '../../context/ThemeContext'
-import { Typography } from '../Typography'
-import { Card } from '../Card'
-import { FileText, Check, X, AlertCircle, Filter } from 'react-native-feather'
-import { useUserStore } from '../../store/userStore'
-
-type Contract = {
-  $id: string
-  template_type: string
-  locations: string[]
-  dynamic_fields: string
-  buyer_id: string
-  status: string
-  $createdAt: string
-}
+import { View, StyleSheet, FlatList, TouchableOpacity, ScrollView } from "react-native";
+import { useState } from "react";
+import { Card } from "../Card";
+import { Typography } from "../Typography";
+import { Calendar, DollarSign, Package, Truck, Clock, Check, AlertCircle } from "react-native-feather";
+import { useTheme } from "../../context/ThemeContext";
 
 type ContractRequest = {
-  $id: string
-  contract_id: string
-  farmer_id: string
-  status: string
-  $createdAt: string
-}
+  $id: string;
+  contract_id: string;
+  farmer_id: string;
+  status: string;
+  $createdAt: string;
+  $updatedAt: string;
+};
+
+type Contract = {
+  $id: string;
+  buyer_id: string;
+  status: string;
+  dynamic_fields: string;
+  locations: string[];
+  crop_type: string;
+  quantity: number;
+  price_per_kg: number;
+  advance_payment: number;
+  delivery_date: string;
+  payment_terms: string;
+  $createdAt: string;
+  $updatedAt: string;
+};
+
+type ContractWithRequests = {
+  details: Contract;
+  requests: ContractRequest[];
+};
 
 const MarketContracts = () => {
-  const { colors, spacing, radius } = useTheme()
-  const [contracts, setContracts] = useState<Contract[]>([])
-  const [requests, setRequests] = useState<ContractRequest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('available')
-  const user = useUserStore(state => state.user)
-  const userEmail = user?.email
-  const API_BASE_URL = 'https://0c35-124-66-175-40.ngrok-free.app'
+  const { colors } = useTheme();
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  // Fetch available contracts and farmer's requests
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!userEmail) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch actual contracts from API
-        const contractsResponse = await fetch(`${API_BASE_URL}/contracts?email=${userEmail}`)
-        const contractsData = await contractsResponse.json()
-        
-        // Fetch actual contract requests from API
-        const requestsResponse = await fetch(`${API_BASE_URL}/contract_requests?email=${userEmail}`)
-        const requestsData = await requestsResponse.json()
-        
-        setContracts(contractsData.documents || [])
-        setRequests(requestsData.documents || [])
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching contracts data:', error)
-        setLoading(false)
-        Alert.alert('Error', 'Failed to load contracts. Please check your connection and try again.')
-      }
+  // Hardcoded contracts data
+  const contractsData: Record<string, ContractWithRequests> = {
+    "6817892000104e73ab7d": {
+      details: {
+        buyer_id: "681789200022c543786d",
+        status: "accepted",
+        dynamic_fields: "{\"requirements\": {\"grade_required\": \"A\", \"transport_required\": true}}",
+        locations: [
+          "CHHATTISGARH",
+          "Delhi"
+        ],
+        crop_type: "RICE",
+        quantity: 1000,
+        price_per_kg: 25,
+        advance_payment: 5000,
+        delivery_date: "2025-10-31T15:34:56.473+00:00",
+        payment_terms: "50% advance, 50% on delivery",
+        $id: "6817892000104e73ab7d",
+        $createdAt: "2025-05-04T15:34:56.478+00:00",
+        $updatedAt: "2025-05-04T15:34:56.478+00:00"
+      },
+      requests: [
+        {
+          contract_id: "6817892000104e73ab7d",
+          farmer_id: "68178920001908c8bf3a",
+          status: "accepted",
+          $id: "68178920000fdfe6133c",
+          $createdAt: "2025-05-04T15:34:56.509+00:00",
+          $updatedAt: "2025-05-04T15:34:56.509+00:00"
+        }
+      ]
+    },
+    "681789200023135d6953": {
+      details: {
+        buyer_id: "681789200007d68f8bb3",
+        status: "fulfilled",
+        dynamic_fields: "{\"requirements\": {\"certification\": \"organic\", \"storage_condition\": \"cool dry place\"}}",
+        locations: [
+          "CHHATTISGARH",
+          "Maharashtra"
+        ],
+        crop_type: "MAIZE",
+        quantity: 800,
+        price_per_kg: 22,
+        advance_payment: 4000,
+        delivery_date: "2025-10-31T15:34:56.473+00:00",
+        payment_terms: "Cash on delivery",
+        $id: "681789200023135d6953",
+        $createdAt: "2025-05-04T15:34:56.484+00:00",
+        $updatedAt: "2025-05-04T15:34:56.484+00:00"
+      },
+      requests: [
+        {
+          contract_id: "681789200023135d6953",
+          farmer_id: "68178920001908c8bf3a",
+          status: "fulfilled",
+          $id: "6817892000077f01f136",
+          $createdAt: "2025-05-04T15:34:56.515+00:00",
+          $updatedAt: "2025-05-04T15:34:56.515+00:00"
+        }
+      ]
+    },
+    "681789200024eb826f11": {
+      details: {
+        buyer_id: "681789200020953b7072",
+        status: "listed",
+        dynamic_fields: "{\"requirements\": {\"harvest_window\": \"Oct-Nov\", \"packaging_standard\": \"standard boxes\"}}",
+        locations: [
+          "CHHATTISGARH",
+          "West Bengal"
+        ],
+        crop_type: "MANGO",
+        quantity: 600,
+        price_per_kg: 30,
+        advance_payment: 3000,
+        delivery_date: "2025-10-01T15:34:56.473+00:00",
+        payment_terms: "Full payment on delivery",
+        $id: "681789200024eb826f11",
+        $createdAt: "2025-05-04T15:34:56.490+00:00",
+        $updatedAt: "2025-05-04T15:34:56.490+00:00"
+      },
+      requests: [
+        {
+          contract_id: "681789200024eb826f11",
+          farmer_id: "68178920001908c8bf3a",
+          status: "pending",
+          $id: "68178920001057340078",
+          $createdAt: "2025-05-04T15:34:56.521+00:00",
+          $updatedAt: "2025-05-04T15:34:56.521+00:00"
+        }
+      ]
+    },
+    "6817892000002c333788": {
+      details: {
+        buyer_id: "681789200021c64cb1ac",
+        status: "listed",
+        dynamic_fields: "{\"requirements\": {\"bulk_order_only\": true, \"min_diameter_mm\": 40}}",
+        locations: [
+          "CHHATTISGARH",
+          "Gujarat"
+        ],
+        crop_type: "ONION",
+        quantity: 500,
+        price_per_kg: 18,
+        advance_payment: 2000,
+        delivery_date: "2025-11-05T15:34:56.473+00:00",
+        payment_terms: "Advance payment only",
+        $id: "6817892000002c333788",
+        $createdAt: "2025-05-04T15:34:56.497+00:00",
+        $updatedAt: "2025-05-04T15:34:56.497+00:00"
+      },
+      requests: []
+    },
+    "6817892000045500bd75": {
+      details: {
+        buyer_id: "681789200025769524c5",
+        status: "listed",
+        dynamic_fields: "{\"requirements\": {\"refrigeration_required\": true, \"grade_required\": \"B\"}}",
+        locations: [
+          "CHHATTISGARH",
+          "Karnataka"
+        ],
+        crop_type: "POTATO",
+        quantity: 700,
+        price_per_kg: 20,
+        advance_payment: 3500,
+        delivery_date: "2025-10-21T15:34:56.473+00:00",
+        payment_terms: "50% advance, 50% on delivery",
+        $id: "6817892000045500bd75",
+        $createdAt: "2025-05-04T15:34:56.503+00:00",
+        $updatedAt: "2025-05-04T15:34:56.503+00:00"
+      },
+      requests: []
     }
-    
-    fetchData()
-  }, [userEmail])
-  
-  const handleRequestContract = async (contractId: string) => {
-    if (!userEmail) {
-      Alert.alert('Error', 'You must be logged in to request a contract');
-      return;
-    }
+  };
 
+  // Convert the object to an array for FlatList
+  const contractsList = Object.values(contractsData);
+
+  // Filter contracts based on active filter
+  const filteredContracts = contractsList.filter(contract => {
+    if (activeFilter === "all") return true;
+    if (activeFilter === "participated") {
+      return contract.requests.length > 0;
+    }
+    if (activeFilter === activeFilter) {
+      return contract.details.status === activeFilter;
+    }
+    return true;
+  });
+
+  const renderRequirements = (dynamicFields: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/contract_requests?email=${userEmail}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contract_id: contractId })
-      })
+      const parsed = JSON.parse(dynamicFields);
+      const requirements = parsed.requirements || {};
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to submit contract request')
-      }
-      
-      const data = await response.json()
-      
-      setRequests([...requests, data])
-      Alert.alert('Success', 'Contract request submitted successfully')
-    } catch (error) {
-      console.error('Error requesting contract:', error)
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to submit contract request')
-    }
-  }
-  
-  const handleDeleteRequest = async (requestId: string) => {
-    if (!userEmail) {
-      Alert.alert('Error', 'You must be logged in to manage requests');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/contract_requests/${requestId}?email=${userEmail}`, {
-        method: 'DELETE'
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to withdraw request')
-      }
-      
-      // Update local state
-      setRequests(requests.filter(req => req.$id !== requestId))
-      Alert.alert('Success', 'Request withdrawn successfully')
-    } catch (error) {
-      console.error('Error deleting request:', error)
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to withdraw request')
-    }
-  }
-  
-  const handleFulfillContract = async (requestId: string) => {
-    if (!userEmail) {
-      Alert.alert('Error', 'You must be logged in to fulfill contracts');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/contract_requests/${requestId}/fulfill?email=${userEmail}`, {
-        method: 'PATCH'
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to mark contract as fulfilled')
-      }
-      
-      const data = await response.json()
-      
-      // Update local state with the response data
-      setRequests(requests.map(req => 
-        req.$id === requestId ? data : req
-      ))
-      
-      Alert.alert('Success', 'Contract marked as fulfilled')
-    } catch (error) {
-      console.error('Error fulfilling contract:', error)
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to mark contract as fulfilled')
-    }
-  }
-  
-  const renderDynamicFields = (fieldsJson: string) => {
-    try {
-      const fields = JSON.parse(fieldsJson || '{}');
-      return Object.entries(fields).map(([key, value]) => {
-        // Ensure key is a string and handle capitalization safely
-        const formattedKey = (key || '')
+      return Object.entries(requirements).map(([key, value]) => {
+        const formattedKey = key
           .split('_')
-          .filter(Boolean) // Remove empty segments
-          .map(word => {
-            if (!word) return '';
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-          })
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
         
         return (
-          <View key={key || Math.random().toString()} style={styles.fieldRow}>
-            <Typography variant="body" style={styles.fieldLabel}>
-              {formattedKey || 'Field'}:
+          <View key={key} style={styles.requirementItem}>
+            <Typography variant="caption" style={styles.requirementLabel}>
+              {formattedKey}:
             </Typography>
-            <Typography variant="body">{value !== undefined ? String(value) : ''}</Typography>
+            <Typography variant="caption" style={styles.requirementValue}>
+              {String(value)}
+            </Typography>
           </View>
         );
       });
-    } catch (e) {
-      console.error('Error parsing contract details:', e);
-      return <Typography variant="body" color="error">Invalid contract details</Typography>;
+    } catch (error) {
+      return null;
     }
-  }
-  
+  };
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'listed':
+    switch (status.toLowerCase()) {
       case 'accepted':
-        return colors.success
-      case 'pending':
-        return colors.warning
+        return colors.success;
       case 'fulfilled':
-        return colors.primary
+        return colors.primary;
+      case 'pending':
+        return colors.warning;
+      case 'listed':
+        return colors.info || '#3B82F6';
       default:
-        return colors.error
+        return colors.textSecondary;
     }
-  }
-  
-  const renderContract = ({ item }: { item: Contract }) => (
-    <Card variant="elevated" style={styles.contractCard}>
-      <View style={styles.contractHeader}>
-        <View style={styles.contractTypeContainer}>
-          <FileText width={20} height={20} stroke={colors.primary} />
-          <Typography variant="bodyLarge" style={styles.contractTitle}>
-            {(item.template_type ? item.template_type.charAt(0).toUpperCase() : "") + (item.template_type ? item.template_type.slice(1) : "")} Contract
-          </Typography>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-          <Typography variant="small" color={getStatusColor(item.status) === colors.primary ? 'primary' : undefined} style={{ color: getStatusColor(item.status) }}>
-            {item.status}
-          </Typography>
-        </View>
-      </View>
-      
-      <View style={styles.locations}>
-        <Typography variant="caption" color="textSecondary">Available in:</Typography>
-        <Typography variant="body" style={{ marginLeft: 5 }}>{item.locations.join(', ')}</Typography>
-      </View>
-      
-      <View style={styles.divider} />
-      
-      <View style={styles.contractDetails}>
-        {renderDynamicFields(item.dynamic_fields)}
-      </View>
-      
-      <TouchableOpacity 
-        style={[styles.actionButton, { backgroundColor: colors.primary }]}
-        onPress={() => handleRequestContract(item.$id)}
-      >
-        <Typography variant="body" style={{ color: 'white', fontWeight: '600' }}>Request Contract</Typography>
-      </TouchableOpacity>
-    </Card>
-  )
-  
-  const renderRequest = ({ item }: { item: ContractRequest }) => (
-    <Card variant="elevated" style={styles.requestCard}>
-      <View style={styles.requestHeader}>
-        <View style={styles.requestIdContainer}>
-          <FileText width={16} height={16} stroke={colors.primary} />
-          <Typography variant="body" style={styles.requestId}>Request #{item.$id.slice(0, 6)}</Typography>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-          <Typography variant="small" style={{ color: getStatusColor(item.status) }}>
-            {item.status}
-          </Typography>
-        </View>
-      </View>
-      
-      <Typography variant="caption" color="textSecondary" style={styles.requestDate}>
-        Requested on: {new Date(item.$createdAt).toLocaleDateString()}
-      </Typography>
-      
-      <View style={styles.requestActions}>
-        {item.status === 'pending' && (
-          <TouchableOpacity 
-            style={[styles.requestActionButton, { backgroundColor: colors.error + '20' }]}
-            onPress={() => handleDeleteRequest(item.$id)}
-          >
-            <X width={16} height={16} stroke={colors.error} />
-            <Typography variant="small" style={{ color: colors.error, marginLeft: 6 }}>
-              Withdraw
+  };
+
+  const renderContractItem = ({ item }: { item: ContractWithRequests }) => {
+    const { details, requests } = item;
+    const deliveryDate = new Date(details.delivery_date);
+    const requestStatus = requests.length > 0 ? requests[0].status : 'none';
+    
+    return (
+      <Card variant="elevated" style={styles.contractCard}>
+        <View style={styles.contractHeader}>
+          <View style={styles.cropTypeContainer}>
+            <Typography variant="bodyLarge" style={styles.cropType}>
+              {details.crop_type}
             </Typography>
-          </TouchableOpacity>
-        )}
+          </View>
+          
+          <View style={[
+            styles.statusBadge, 
+            { backgroundColor: getStatusColor(details.status) + '20' }
+          ]}>
+            <Typography 
+              variant="small" 
+              style={{ 
+                color: getStatusColor(details.status),
+                fontWeight: '600' 
+              }}
+            >
+              {details.status.toUpperCase()}
+            </Typography>
+          </View>
+        </View>
         
-        {item.status === 'accepted' && (
+        <View style={styles.contractDetails}>
+          <View style={styles.detailRow}>
+            <View style={styles.detailItem}>
+              <Package width={16} height={16} stroke={colors.textSecondary} />
+              <Typography variant="body" style={styles.detailText}>
+                {details.quantity} kg
+              </Typography>
+            </View>
+            
+            <View style={styles.detailItem}>
+              <DollarSign width={16} height={16} stroke={colors.textSecondary} />
+              <Typography variant="body" style={styles.detailText}>
+                ₹{details.price_per_kg}/kg
+              </Typography>
+            </View>
+          </View>
+          
+          <View style={styles.detailRow}>
+            <View style={styles.detailItem}>
+              <Calendar width={16} height={16} stroke={colors.textSecondary} />
+              <Typography variant="body" style={styles.detailText}>
+                {deliveryDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </Typography>
+            </View>
+            
+            <View style={styles.detailItem}>
+              <Truck width={16} height={16} stroke={colors.textSecondary} />
+              <Typography variant="body" style={styles.detailText}>
+                {details.locations.join(', ')}
+              </Typography>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.requirements}>
+          <Typography variant="caption" style={styles.requirementsTitle}>
+            Requirements
+          </Typography>
+          <View style={styles.requirementsList}>
+            {renderRequirements(details.dynamic_fields)}
+          </View>
+        </View>
+        
+        <View style={styles.paymentSection}>
+          <Typography variant="caption" style={styles.paymentTitle}>
+            Payment Terms
+          </Typography>
+          <Typography variant="body" color="textSecondary">
+            {details.payment_terms}
+          </Typography>
+          <Typography variant="caption" style={styles.advancePayment}>
+            Advance payment: ₹{details.advance_payment}
+          </Typography>
+        </View>
+        
+        {requests.length > 0 ? (
+          <View style={styles.requestStatus}>
+            <Typography variant="caption" style={styles.requestStatusTitle}>
+              Your application:
+            </Typography>
+            <View style={[
+              styles.requestStatusBadge,
+              { backgroundColor: getStatusColor(requestStatus) + '20' }
+            ]}>
+              {requestStatus === 'pending' && <Clock width={14} height={14} stroke={getStatusColor(requestStatus)} />}
+              {requestStatus === 'accepted' && <Check width={14} height={14} stroke={getStatusColor(requestStatus)} />}
+              {requestStatus === 'fulfilled' && <Check width={14} height={14} stroke={getStatusColor(requestStatus)} />}
+              
+              <Typography 
+                variant="small" 
+                style={{ 
+                  color: getStatusColor(requestStatus),
+                  fontWeight: '600',
+                  marginLeft: 4
+                }}
+              >
+                {requestStatus.toUpperCase()}
+              </Typography>
+            </View>
+          </View>
+        ) : (
           <TouchableOpacity 
-            style={[styles.requestActionButton, { backgroundColor: colors.primary + '20' }]}
-            onPress={() => handleFulfillContract(item.$id)}
+            style={[styles.applyButton, { backgroundColor: colors.primary }]}
+            activeOpacity={0.8}
           >
-            <Check width={16} height={16} stroke={colors.primary} />
-            <Typography variant="small" color="primary" style={{ marginLeft: 6 }}>
-              Mark as Fulfilled
+            <Typography variant="body" style={{ color: 'white', fontWeight: '600' }}>
+              Apply for Contract
             </Typography>
           </TouchableOpacity>
         )}
-      </View>
-    </Card>
-  )
+      </Card>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.tabs}>
-        <TouchableOpacity 
-          style={[
-            styles.tab, 
-            activeTab === 'available' && [styles.activeTab, { borderBottomColor: colors.primary }]
+      <View style={styles.filterContainer}>
+        <ScrollableFilter 
+          filters={[
+            { id: 'all', label: 'All Contracts' },
+            { id: 'listed', label: 'Open' },
+            { id: 'accepted', label: 'Accepted' },
+            { id: 'fulfilled', label: 'Fulfilled' },
+            { id: 'participated', label: 'Applied' },
           ]}
-          onPress={() => setActiveTab('available')}
-        >
-          <Typography 
-            variant="body" 
-            color={activeTab === 'available' ? 'primary' : 'textSecondary'}
-          >
-            Available Contracts
-          </Typography>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[
-            styles.tab, 
-            activeTab === 'requests' && [styles.activeTab, { borderBottomColor: colors.primary }]
-          ]}
-          onPress={() => setActiveTab('requests')}
-        >
-          <Typography 
-            variant="body" 
-            color={activeTab === 'requests' ? 'primary' : 'textSecondary'}
-          >
-            My Requests
-          </Typography>
-        </TouchableOpacity>
+          activeFilter={activeFilter}
+          onSelectFilter={setActiveFilter}
+        />
       </View>
       
-      {loading ? (
-        <Typography variant="body" style={styles.loadingText}>Loading...</Typography>
-      ) : (
-        activeTab === 'available' ? (
-          <FlatList
-            data={contracts}
-            renderItem={renderContract}
-            keyExtractor={(item) => item.$id}
-            contentContainerStyle={styles.listContainer}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <AlertCircle width={24} height={24} stroke={colors.textSecondary} />
-                <Typography variant="body" color="textSecondary" style={styles.emptyText}>
-                  No contracts available for your location
-                </Typography>
-              </View>
-            }
-          />
-        ) : (
-          <FlatList
-            data={requests}
-            renderItem={renderRequest}
-            keyExtractor={(item) => item.$id}
-            contentContainerStyle={styles.listContainer}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <AlertCircle width={24} height={24} stroke={colors.textSecondary} />
-                <Typography variant="body" color="textSecondary" style={styles.emptyText}>
-                  You haven't requested any contracts yet
-                </Typography>
-              </View>
-            }
-          />
-        )
-      )}
+      <FlatList
+        data={filteredContracts}
+        renderItem={renderContractItem}
+        keyExtractor={item => item.details.$id}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <AlertCircle width={32} height={32} stroke={colors.textSecondary} />
+            <Typography variant="body" color="textSecondary" style={styles.emptyText}>
+              No contracts match your filter
+            </Typography>
+          </View>
+        }
+      />
     </View>
-  )
-}
+  );
+};
+
+type FilterItem = {
+  id: string;
+  label: string;
+};
+
+const ScrollableFilter = ({ 
+  filters, 
+  activeFilter, 
+  onSelectFilter 
+}: { 
+  filters: FilterItem[], 
+  activeFilter: string, 
+  onSelectFilter: (id: string) => void 
+}) => {
+  const { colors } = useTheme();
+  
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.filterScrollContainer}
+    >
+      {filters.map(filter => (
+        <TouchableOpacity
+          key={filter.id}
+          style={[
+            styles.filterChip,
+            activeFilter === filter.id && [
+              styles.activeFilterChip,
+              { borderColor: colors.primary, backgroundColor: colors.primary + '10' }
+            ]
+          ]}
+          onPress={() => onSelectFilter(filter.id)}
+        >
+          <Typography 
+            variant="small" 
+            color={activeFilter === filter.id ? 'primary' : 'textSecondary'} 
+            style={activeFilter === filter.id && { fontWeight: '600' }}
+          >
+            {filter.label}
+          </Typography>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
-  tabs: {
-    flexDirection: 'row',
-    marginBottom: 20,
+  filterContainer: {
+    marginBottom: 16,
   },
-  tab: {
-    paddingVertical: 8,
+  filterScrollContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  filterChip: {
     paddingHorizontal: 16,
-    marginRight: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginRight: 12,
+    backgroundColor: '#F9FAFB',
   },
-  activeTab: {
-    borderBottomWidth: 3,
-  },
-  loadingText: {
-    textAlign: 'center',
-    marginTop: 40,
+  activeFilterChip: {
+    borderWidth: 1,
   },
   listContainer: {
+    padding: 20,
     paddingBottom: 100,
   },
   emptyContainer: {
@@ -374,17 +475,13 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   emptyText: {
-    marginTop: 12,
+    marginTop: 16,
     textAlign: 'center',
   },
   contractCard: {
-    marginBottom: 20,
+    marginBottom: 24,
     padding: 16,
     borderRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   contractHeader: {
     flexDirection: 'row',
@@ -392,85 +489,99 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  contractTypeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  cropTypeContainer: {
+    flex: 1,
   },
-  contractTitle: {
+  cropType: {
+    fontSize: 18,
     fontWeight: '700',
-    marginLeft: 8,
   },
   statusBadge: {
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  locations: {
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E0E0E0',
-    marginVertical: 14,
+    paddingVertical: 4,
+    borderRadius: 16,
   },
   contractDetails: {
-    marginBottom: 18,
     backgroundColor: '#FAFAFA',
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 10,
+    marginBottom: 16,
   },
-  fieldRow: {
+  detailRow: {
     flexDirection: 'row',
-    marginBottom: 6,
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  fieldLabel: {
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  detailText: {
+    marginLeft: 8,
+  },
+  requirements: {
+    marginBottom: 16,
+  },
+  requirementsTitle: {
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  requirementsList: {
+    backgroundColor: '#F5F5F5',
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#3B82F6',
+  },
+  requirementItem: {
+    flexDirection: 'row',
+    marginBottom: 4,
+  },
+  requirementLabel: {
     fontWeight: '600',
     marginRight: 8,
   },
-  actionButton: {
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  requirementValue: {
+    flex: 1,
   },
-  requestCard: {
+  paymentSection: {
     marginBottom: 16,
-    padding: 16,
-    borderRadius: 12,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    borderRadius: 8,
   },
-  requestHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  paymentTitle: {
+    fontWeight: '700',
+    marginBottom: 8,
   },
-  requestIdContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  requestId: {
+  advancePayment: {
     fontWeight: '600',
-    marginLeft: 8,
+    marginTop: 8,
   },
-  requestDate: {
-    marginBottom: 14,
-  },
-  requestActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  requestActionButton: {
+  requestStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    justifyContent: 'space-between',
+    backgroundColor: '#F0F9FF',
+    padding: 12,
+    borderRadius: 8,
   },
-})
+  requestStatusTitle: {
+    fontWeight: '600',
+  },
+  requestStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  applyButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+});
 
-export default MarketContracts
+export default MarketContracts;

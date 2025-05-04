@@ -31,7 +31,7 @@ type SubsidyRequest = {
   email?: string
 }
 
-const API_BASE_URL = 'https://0c35-124-66-175-40.ngrok-free.app';
+const API_BASE_URL = 'https://4f70-124-66-175-40.ngrok-free.app';
 
 const MarketSubsidies = () => {
   const { colors, spacing, radius } = useTheme()

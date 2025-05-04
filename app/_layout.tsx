@@ -8,6 +8,7 @@ import { View, ActivityIndicator } from 'react-native'
 import { useUserStore } from "../store/userStore";
 import { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
+import { LanguageProvider } from './context/LanguageContext';
 
 function RootLayoutNav() {
   const { isLoggedIn, user } = useUserStore();
@@ -49,7 +50,6 @@ function RootLayoutNav() {
         name="auth/login" 
         options={{ 
           headerShown: false,
-          // Prevent going back to the home screen
           headerBackVisible: false,
         }} 
       />
@@ -57,7 +57,6 @@ function RootLayoutNav() {
         name="auth/signup" 
         options={{ 
           headerShown: false,
-          // Prevent going back to the home screen
           headerBackVisible: false,
         }} 
       />
@@ -84,8 +83,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ThemeProvider>
-          <RootLayoutNav />
-          <StatusBar />
+          <LanguageProvider>
+            <RootLayoutNav />
+            <StatusBar />
+          </LanguageProvider>
         </ThemeProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>

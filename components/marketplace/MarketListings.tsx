@@ -27,7 +27,7 @@ type Bid = {
   $createdAt: string
 }
 
-const API_BASE_URL = 'https://0c35-124-66-175-40.ngrok-free.app';
+const API_BASE_URL = 'https://4f70-124-66-175-40.ngrok-free.app';
 const FARMER_EMAIL = 'farmer@example.com'; // This should come from auth context in a real app
 
 const MarketListings = () => {
@@ -219,13 +219,13 @@ const MarketListings = () => {
             style={[styles.bidActionButton, { backgroundColor: colors.primary }]}
             onPress={() => handleAcceptBid(listingId, bid.$id)}
           >
-            <Typography variant="small" color="textSecondary">Accept</Typography>
+            <Typography variant="small" color="accent">Accept</Typography>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.bidActionButton, { backgroundColor: colors.error }]}
             onPress={() => handleRejectBid(listingId, bid.$id)}
           >
-            <Typography variant="small" color="error">Reject</Typography>
+            <Typography variant="small" color="accent">Reject</Typography>
           </TouchableOpacity>
         </View>
       )}

@@ -29,7 +29,7 @@ import {
 } from 'react-native-feather';
 import { Link } from 'expo-router';
 
-const API_BASE_URL = 'https://0c35-124-66-175-40.ngrok-free.app';
+const API_BASE_URL = 'https://4f70-124-66-175-40.ngrok-free.app';
 const screenWidth = Dimensions.get('window').width;
 
 // Types

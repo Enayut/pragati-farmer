@@ -48,7 +48,7 @@ export const useUserStore = create<UserState>()(
           };
           
           console.log('Sending registration request with data:', userDataWithRole);
-          const response = await fetch('https://0c35-124-66-175-40.ngrok-free.app/users', {
+          const response = await fetch('https://4f70-124-66-175-40.ngrok-free.app/users', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export const useUserStore = create<UserState>()(
           // In a real app, you would validate credentials against a backend
           // For now, we're just fetching the user by email
           console.log('Fetching user data for:', email);
-          const response = await fetch(`https://0c35-124-66-175-40.ngrok-free.app/users/${email}`);
+          const response = await fetch(`https://4f70-124-66-175-40.ngrok-free.app/users/${email}`);
           const userData = await response.json();
           console.log('Login API response:', userData);
           
@@ -127,7 +127,7 @@ export const useUserStore = create<UserState>()(
       fetchUserByEmail: async (email) => {
         try {
           console.log('Fetching user data for:', email);
-          const response = await fetch(`https://0c35-124-66-175-40.ngrok-free.app/${email}`);
+          const response = await fetch(`https://4f70-124-66-175-40.ngrok-free.app/${email}`);
           
           if (!response.ok) {
             console.log('User not found:', email);

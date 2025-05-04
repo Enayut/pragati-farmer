@@ -1,10 +1,11 @@
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../../context/ThemeContext";
-import { View } from "react-native";
+import { useTranslationStore } from "../../store/translationStore";
 
 export default function BuyerTabLayout() {
   const { colors } = useTheme();
+  const { translate } = useTranslationStore();
 
   return (
     <Tabs
@@ -21,7 +22,7 @@ export default function BuyerTabLayout() {
       <Tabs.Screen
         name="marketplace"
         options={{
-          title: "Marketplace",
+          title: translate("Marketplace"),
           tabBarIcon: ({ color, size }) => (
             <Feather name="shopping-cart" size={size} color={color} />
           ),

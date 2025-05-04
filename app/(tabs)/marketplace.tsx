@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ScrollView } from "react-native"
+import { View, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ScrollView, Text } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useTheme } from "../../context/ThemeContext"
 import { useState } from "react"
@@ -7,7 +7,7 @@ import { Typography } from "../../components/Typography"
 import { Search, Filter, MessageSquare, DollarSign, Tag, Heart } from "react-native-feather"
 import MarketListings from "../../components/marketplace/MarketListings"
 import MarketContracts from "../../components/marketplace/MarketContracts"
-import MarketSubsidies from "../../components/marketplace/MarketSubsidies"
+import { TranslatedText } from "../../components/TranslatedText"
 
 type MarketItem = {
   id: string
@@ -29,7 +29,7 @@ type MarketItem = {
 
 export default function MarketplaceScreen() {
   const { colors, spacing, radius } = useTheme()
-  const [activeTab, setActiveTab] = useState("marketplace")
+  const [activeTab, setActiveTab] = useState("listings")
   const [searchQuery, setSearchQuery] = useState("")
   const [marketItems, setMarketItems] = useState<MarketItem[]>([
     {
@@ -134,18 +134,8 @@ export default function MarketplaceScreen() {
         return <MarketListings />
       case "contracts":
         return <MarketContracts />
-      case "subsidies":
-        return <MarketSubsidies />
       default:
-        return (
-          <FlatList
-            data={marketItems}
-            renderItem={renderMarketItem}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContainer}
-          />
-        )
+        return <MarketListings />
     }
   }
 
@@ -206,7 +196,7 @@ export default function MarketplaceScreen() {
               ))}
               {item.bids.length > 2 && (
                 <Typography variant="small" color="textSecondary">
-                  +{item.bids.length - 2} more bids
+                  {`+${(item.bids.length - 2).toString()} more bids`}
                 </Typography>
               )}
             </View>
@@ -263,40 +253,7 @@ export default function MarketplaceScreen() {
         </TouchableOpacity>
       </View>
 
-      <View 
-        style={[
-          styles.searchContainer, 
-          { 
-            backgroundColor: colors.backgroundSecondary,
-            borderRadius: radius.md
-          }
-        ]}
-      >
-        <Search width={20} height={20} stroke={colors.textSecondary} style={styles.searchIcon} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Search marketplace..."
-          placeholderTextColor={colors.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
       <View style={styles.tabsContainer}>
-        <TouchableOpacity 
-          style={[
-            styles.tab, 
-            activeTab === "marketplace" && [styles.activeTab, { borderBottomColor: colors.primary }]
-          ]}
-          onPress={() => setActiveTab("marketplace")}
-        >
-          <Typography 
-            variant="body" 
-            color={activeTab === "marketplace" ? "primary" : "textSecondary"}
-          >
-            Marketplace
-          </Typography>
-        </TouchableOpacity>
         <TouchableOpacity 
           style={[
             styles.tab, 
@@ -323,20 +280,6 @@ export default function MarketplaceScreen() {
             color={activeTab === "contracts" ? "primary" : "textSecondary"}
           >
             Contracts
-          </Typography>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[
-            styles.tab, 
-            activeTab === "subsidies" && [styles.activeTab, { borderBottomColor: colors.primary }]
-          ]}
-          onPress={() => setActiveTab("subsidies")}
-        >
-          <Typography 
-            variant="body" 
-            color={activeTab === "subsidies" ? "primary" : "textSecondary"}
-          >
-            Subsidies
           </Typography>
         </TouchableOpacity>
       </View>

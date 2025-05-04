@@ -2,6 +2,7 @@ import type React from "react"
 import { View, Text, StyleSheet } from "react-native"
 import Svg, { Circle } from "react-native-svg"
 import { Droplet, TrendingUp } from "react-native-feather"
+import { TranslatedText } from "./TranslatedText"
 
 interface CircularProgressProps {
   size: number

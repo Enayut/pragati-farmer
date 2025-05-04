@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../context/ThemeContext";
 import { useUserStore } from "../../store/userStore";
 import { useRouter, Link } from "expo-router";
+import { TranslatedText } from "../../components/TranslatedText";
 
 export default function LoginScreen() {
   const { colors } = useTheme();
@@ -97,7 +98,7 @@ export default function LoginScreen() {
 
           <View style={styles.signupTextContainer}>
             <Text style={[styles.signupText, { color: colors.textSecondary }]}>
-              Don't have an account?{" "}
+              {"Don't have an account? "}
             </Text>
             <Link href="/auth/signup" asChild>
               <TouchableOpacity>

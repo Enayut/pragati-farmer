@@ -4,6 +4,7 @@ import { useTheme } from "../../context/ThemeContext"
 import { useFarmStore } from "../../store/farmStore"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { MapPin, Calendar, Droplet, Activity, ArrowLeft, Edit2 } from "react-native-feather"
+import { TranslatedText } from "../../components/TranslatedText"
 
 export default function FieldDetailScreen() {
   const { colors } = useTheme()
